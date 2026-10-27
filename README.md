@@ -1,8 +1,6 @@
-# Threadbase - Upload Server Starter
+# Threadbase - Upload Server
 
-Starter repo for **LU 4.9 - File Upload with multer**.
-
-`verifyToken` and a demo login already work. multer is **not** installed. There is no upload route and no static serving. Your job: install multer, configure storage + filter + limit, write `POST /api/upload` behind auth, and serve `uploads/` statically.
+Express server with authenticated image uploads using multer.
 
 ## Setup
 
@@ -20,18 +18,18 @@ curl -X POST http://localhost:3001/auth/login \
   -d '{"username":"ada","password":"password"}'
 ```
 
-Copy the `token` from the response and use it as `Authorization: Bearer <token>`.
+The demo credentials are `ada` / `password`. Copy the returned `token` and send it as a bearer token.
 
-## Files to create or edit
+## Upload an image
 
-| File | What to do |
-|------|------------|
-| `config/upload.js` | Create - multer instance (diskStorage + fileFilter + limits) |
-| `routes/upload.routes.js` | Create - `POST /api/upload` with `verifyToken` then `upload.single("avatar")` |
-| `server.js` | Wire `express.static("uploads")` and the upload route (see TODOs) |
+Send a `POST /api/upload` request using `multipart/form-data`. The file field must be named `avatar`; supported image types are JPEG, PNG, GIF, and WebP, up to 5 MB.
 
-Do **not** edit `middleware/auth.js`.
+```bash
+curl -X POST http://localhost:3001/api/upload \
+  -H "Authorization: Bearer <token>" \
+  -F "avatar=@./avatar.png"
+```
 
-## Test your work
+On success, the server returns `201` with a `url`, for example `/uploads/<generated-filename>.png`. Open `http://localhost:3001<url>` to view the uploaded image. Missing/invalid tokens and invalid uploads return `401` and `400`, respectively.
 
-In Thunder Client / Postman: `POST /api/upload`, `Authorization: Bearer <token>`, body type **form-data**, field `avatar` (type: file) with an image. You should get a 201 with a `url`. Paste `http://localhost:3001<url>` in the browser - the image opens. A PDF should be rejected with 400. No token should give 401.
+Uploaded files are stored in `uploads/`, which is excluded from version control.
